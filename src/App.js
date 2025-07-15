@@ -1,25 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "./context/AuthContext"; // 👈 NEW
 
-function App() {
+import Login from "./pages/login";
+import Dashboard from "./pages/dashboard";
+import DashboardHome from "./pages/DashboardHome";
+import Audiobooks from "./pages/Audiobooks";
+import Chapters from "./pages/Chapters";
+import Addbooks from "./pages/newbookadd";
+import Users from "./pages/Users";
+import CategoriesManager from "./pages/categories"; // Updated import
+import SubscriberClubManager from "./pages/SubscriberClub";
+import Notifications from "./pages/Notifications";
+import ProfilePage from "./pages/ProfilePage"; // Updated import
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />}>
+            <Route index element={<DashboardHome />} />
+            <Route path="categories" element={<CategoriesManager />} />
+            <Route path="audiobooks" element={<Audiobooks />} />
+            <Route path="audiobooks/new" element={<Addbooks />} />
+            <Route path="chapters" element={<Chapters />} />
+            <Route path="users" element={<Users />} />
+            <Route path="subscriber-club" element={<SubscriberClubManager />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="/dashboard/profile" element={<ProfilePage />} />
+          </Route>
+        </Routes>
+        <ToastContainer position="bottom-center" theme="dark" />
+      </Router>
+    </AuthProvider>
   );
 }
-
-export default App;
