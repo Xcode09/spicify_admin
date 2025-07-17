@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db} from "../firebase";
 import { toast } from "react-toastify";
+import { doc, getDoc} from "firebase/firestore"; // make sure to import Firestore methods
 
-const ADMIN_EMAIL = "admin@gmail.com";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,22 +13,44 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleEmailLogin = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const user = await signInWithEmailAndPassword(auth, email, password);
-      if (user.user.email !== ADMIN_EMAIL) {
-        toast.error("Access denied. Not an admin.");
-        return;
-      }
-      navigate("/dashboard");
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
+  
+
+const handleEmailLogin = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+
+  try {
+    // Step 1: Sign in the user
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Step 2: Fetch user role from Firestore
+    const userDocRef = doc(db, "admins", user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      toast.error("Access denied. No role assigned.");
+      return;
     }
-  };
+
+    const userData = userDoc.data();
+
+    // Step 3: Check role
+    if (userData.role !== "admin") {
+      toast.error("Access denied. Not an admin.");
+      return;
+    }
+
+    // Step 4: Navigate to dashboard
+    navigate("/dashboard");
+
+  } catch (err) {
+    toast.error(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="flex min-h-screen bg-gray-100">

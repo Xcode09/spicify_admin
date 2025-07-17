@@ -93,7 +93,7 @@ export default function ChapterManager() {
   const [books, setBooks] = useState([]);
   const [selectedBookId, setSelectedBookId] = useState("");
   const [chapters, setChapters] = useState([]);
-
+  const [audioFile, setAudioFile] = useState(null);
   const [formTitle, setFormTitle] = useState("");
   const [audioURL, setAudioURL] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -123,34 +123,63 @@ export default function ChapterManager() {
   };
 
   const handleSubmit = async () => {
-    if (!formTitle || !audioURL || !selectedBookId)
-      return toast.error("Fill all fields");
+  let finalAudioURL = audioURL;
 
+  try {
+    // 1. Upload file
+    if (audioFile) {
+      toast.info("Uploading audio file...");
+      finalAudioURL = await BunnyUploader.upload(audioFile);
+      setAudioURL(finalAudioURL);
+      toast.dismiss();
+    }
+
+    // 2. Validation
+    if (!formTitle || !finalAudioURL || !selectedBookId) {
+      return toast.error("Fill all fields");
+    }
+
+    // 3. Show "saving to Firestore" toast
+    const savingToastId = toast.loading("Saving chapter to Firestore...");
+
+    // 4. Prepare updated chapter list
     const updatedChapters = [...chapters];
     if (editingId !== null) {
       const index = updatedChapters.findIndex((c) => c.chapterId === editingId);
       updatedChapters[index] = {
         ...updatedChapters[index],
         chapterName: formTitle,
-        chapterUrl: audioURL,
+        chapterUrl: finalAudioURL,
       };
-      toast.success("Chapter updated");
     } else {
       const nextId =
         chapters.length > 0 ? Math.max(...chapters.map((c) => c.chapterId)) + 1 : 0;
       updatedChapters.push({
         chapterId: nextId,
         chapterName: formTitle,
-        chapterUrl: audioURL,
+        chapterUrl: finalAudioURL,
         isFree: nextId === 0,
         isLocked: nextId !== 0,
       });
-      toast.success("Chapter added");
     }
 
+    // 5. Update Firestore
     await updateChaptersInFirestore(updatedChapters);
+
+    // 6. Clear toast and show success
+    toast.dismiss(savingToastId);
+    toast.success(editingId !== null ? "Chapter updated" : "Chapter added");
+
+    // 7. Reset form
     resetForm();
-  };
+  } catch (error) {
+    toast.dismiss();
+    toast.error("Something went wrong while submitting.");
+    console.error("Submit Error:", error);
+  }
+};
+
+
 
   const resetForm = () => {
     setFormTitle("");
@@ -232,27 +261,7 @@ export default function ChapterManager() {
             <input
               type="file"
               accept=".mp3,audio/mpeg"
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                if (file.type !== "audio/mpeg" && !file.name.endsWith(".mp3")) {
-                  toast.error("Only .mp3 files are allowed.");
-                  e.target.value = null;
-                  return;
-                }
-
-                try {
-                  toast.info("Uploading MP3...");
-                  const path = `chapters/${Date.now()}_${file.name}`;
-                  const url = await BunnyUploader.upload(file, path);
-                  setAudioURL(url);
-                  toast.success("MP3 uploaded successfully!");
-                } catch (err) {
-                  console.error(err);
-                  toast.error("Failed to upload MP3.");
-                }
-              }}
+              onChange={(e) => setAudioFile(e.target.files[0])}
               className="w-full mb-2 p-2 rounded border"
             />
             <div className="flex gap-3">

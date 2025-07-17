@@ -264,108 +264,254 @@ export default function SubscriberClubManager() {
   </div>
 
   {/* Sneak Peek Section */}
-  <div className="border-t pt-4 mt-4">
-    <h3 className="font-bold mb-2">Sneak Peek Content</h3>
-    <p className="text-sm text-gray-600 mb-2">Preview of upcoming content for subscribers</p>
-    
-    <div className="space-y-2">
-      <div>
-        <label className="block font-medium">Image URL</label>
+<div className="border-t pt-4 mt-4">
+  <h3 className="font-bold mb-2">Sneak Peek Content</h3>
+  <p className="text-sm text-gray-600 mb-2">Preview of upcoming content for subscribers</p>
+  
+  <div className="space-y-4">
+    {/* Image Section */}
+    <div>
+      <label className="block font-medium mb-1">Image</label>
+      <div className="flex gap-2">
         <input
-          className="w-full border px-4 py-2 rounded"
-          placeholder="https://example.com/sneakpeek-image.jpg"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const url = URL.createObjectURL(file);
+              setForm({
+                ...form,
+                sneakPeek: { ...form.sneakPeek, imageFile: file, imageUrl: url }
+              });
+            }
+          }}
+          className="hidden"
+          id="image-upload"
+        />
+        <label
+          htmlFor="image-upload"
+          className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded cursor-pointer border border-gray-300 transition-colors"
+        >
+          Choose Image
+        </label>
+        <input
+          className="flex-1 border px-4 py-2 rounded"
+          placeholder="Or enter image URL"
           value={form.sneakPeek.imageUrl}
           onChange={(e) =>
             setForm({
               ...form,
-              sneakPeek: { ...form.sneakPeek, imageUrl: e.target.value },
+              sneakPeek: { ...form.sneakPeek, imageUrl: e.target.value, imageFile: null },
+            })
+          }
+        />
+      </div>
+      {form.sneakPeek.imageUrl && (
+        <div className="mt-2">
+          <img 
+            src={form.sneakPeek.imageUrl} 
+            alt="Preview" 
+            className="max-h-40 rounded border"
+          />
+        </div>
+      )}
+    </div>
+
+    {/* Audio Section */}
+    <div>
+      <label className="block font-medium mb-1">Audio</label>
+      <div className="flex gap-2">
+        <input
+          type="file"
+          accept="audio/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const url = URL.createObjectURL(file);
+              setForm({
+                ...form,
+                sneakPeek: { ...form.sneakPeek, audioFile: file, audioUrl: url }
+              });
+            }
+          }}
+          className="hidden"
+          id="audio-upload"
+        />
+        <label
+          htmlFor="audio-upload"
+          className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded cursor-pointer border border-gray-300 transition-colors"
+        >
+          Choose Audio
+        </label>
+        <input
+          className="flex-1 border px-4 py-2 rounded"
+          placeholder="Or enter audio URL"
+          value={form.sneakPeek.audioUrl}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              sneakPeek: { ...form.sneakPeek, audioUrl: e.target.value, audioFile: null },
+            })
+          }
+        />
+      </div>
+      {form.sneakPeek.audioUrl && (
+        <div className="mt-2">
+          <audio controls src={form.sneakPeek.audioUrl} className="w-full" />
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+  {/* Holiday Special Section */}
+<div className="border-t pt-4 mt-4">
+  <div className="flex items-center gap-2 mb-2">
+    <input
+      type="checkbox"
+      id="holidayToggle"
+      checked={form.isHolidaySpecial}
+      onChange={(e) => setForm({ ...form, isHolidaySpecial: e.target.checked })}
+      className="h-4 w-4"
+    />
+    <label htmlFor="holidayToggle" className="font-bold cursor-pointer">
+      Holiday Special
+    </label>
+  </div>
+  
+  {form.isHolidaySpecial && (
+    <div className="space-y-4 bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+      <p className="text-sm text-gray-600 mb-2">Special content for seasonal celebrations</p>
+      
+      {/* Title */}
+      <div>
+        <label className="block font-medium mb-1">Title</label>
+        <input
+          className="w-full border px-4 py-2 rounded focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+          placeholder="Christmas Special 2023"
+          value={form.holidaySpecial.title}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              holidaySpecial: { ...form.holidaySpecial, title: e.target.value },
             })
           }
         />
       </div>
       
+      {/* Image Section */}
       <div>
-        <label className="block font-medium">Audio URL</label>
-        <input
-          className="w-full border px-4 py-2 rounded"
-          placeholder="https://example.com/sneakpeek-audio.mp3"
-          value={form.sneakPeek.audioUrl}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              sneakPeek: { ...form.sneakPeek, audioUrl: e.target.value },
-            })
-          }
-        />
-      </div>
-    </div>
-  </div>
-
-  {/* Holiday Special Section */}
-  <div className="border-t pt-4 mt-4">
-    <div className="flex items-center gap-2 mb-2">
-      <input
-        type="checkbox"
-        id="holidayToggle"
-        checked={form.isHolidaySpecial}
-        onChange={(e) => setForm({ ...form, isHolidaySpecial: e.target.checked })}
-      />
-      <label htmlFor="holidayToggle" className="font-bold">
-        Holiday Special
-      </label>
-    </div>
-    
-    {form.isHolidaySpecial && (
-      <div className="space-y-2 bg-yellow-50 p-3 rounded">
-        <p className="text-sm text-gray-600 mb-2">Special content for seasonal celebrations</p>
-        
-        <div>
-          <label className="block font-medium">Title</label>
+        <label className="block font-medium mb-1">Holiday Image</label>
+        <div className="flex gap-2">
           <input
-            className="w-full border px-4 py-2 rounded"
-            placeholder="Christmas Special 2023"
-            value={form.holidaySpecial.title}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                holidaySpecial: { ...form.holidaySpecial, title: e.target.value },
-              })
-            }
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const url = URL.createObjectURL(file);
+                setForm({
+                  ...form,
+                  holidaySpecial: { 
+                    ...form.holidaySpecial, 
+                    imageFile: file, 
+                    imageUrl: url 
+                  },
+                });
+              }
+            }}
+            className="hidden"
+            id="holidayImageUpload"
           />
-        </div>
-        
-        <div>
-          <label className="block font-medium">Image URL</label>
+          <label
+            htmlFor="holidayImageUpload"
+            className="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded cursor-pointer border border-yellow-300 transition-colors"
+          >
+            Choose Image
+          </label>
           <input
-            className="w-full border px-4 py-2 rounded"
-            placeholder="https://example.com/holiday-image.jpg"
+            className="flex-1 border px-4 py-2 rounded"
+            placeholder="Or enter image URL"
             value={form.holidaySpecial.imageUrl}
             onChange={(e) =>
               setForm({
                 ...form,
-                holidaySpecial: { ...form.holidaySpecial, imageUrl: e.target.value },
+                holidaySpecial: { 
+                  ...form.holidaySpecial, 
+                  imageUrl: e.target.value, 
+                  imageFile: null 
+                },
               })
             }
           />
         </div>
-        
-        <div>
-          <label className="block font-medium">Audio URL</label>
+        {form.holidaySpecial.imageUrl && (
+          <div className="mt-2">
+            <img 
+              src={form.holidaySpecial.imageUrl} 
+              alt="Holiday Preview" 
+              className="max-h-40 rounded border"
+            />
+          </div>
+        )}
+      </div>
+      
+      {/* Audio Section */}
+      <div>
+        <label className="block font-medium mb-1">Holiday Audio</label>
+        <div className="flex gap-2">
           <input
-            className="w-full border px-4 py-2 rounded"
-            placeholder="https://example.com/holiday-audio.mp3"
+            type="file"
+            accept="audio/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const url = URL.createObjectURL(file);
+                setForm({
+                  ...form,
+                  holidaySpecial: { 
+                    ...form.holidaySpecial, 
+                    audioFile: file, 
+                    audioUrl: url 
+                  },
+                });
+              }
+            }}
+            className="hidden"
+            id="holidayAudioUpload"
+          />
+          <label
+            htmlFor="holidayAudioUpload"
+            className="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded cursor-pointer border border-yellow-300 transition-colors"
+          >
+            Choose Audio
+          </label>
+          <input
+            className="flex-1 border px-4 py-2 rounded"
+            placeholder="Or enter audio URL"
             value={form.holidaySpecial.audioUrl}
             onChange={(e) =>
               setForm({
                 ...form,
-                holidaySpecial: { ...form.holidaySpecial, audioUrl: e.target.value },
+                holidaySpecial: { 
+                  ...form.holidaySpecial, 
+                  audioUrl: e.target.value, 
+                  audioFile: null 
+                },
               })
             }
           />
         </div>
+        {form.holidaySpecial.audioUrl && (
+          <div className="mt-2">
+            <audio controls src={form.holidaySpecial.audioUrl} className="w-full" />
+          </div>
+        )}
       </div>
-    )}
-  </div>
+    </div>
+  )}
+</div>
 
   <button
     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4"

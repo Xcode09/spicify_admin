@@ -1,29 +1,23 @@
 // src/services/BunnyUploader.js
 
 export default class BunnyUploader {
-  static async upload(file, path) {
-    const bunnyStorageZone = "spicify-app";
-    const bunnyAccessKey = "1a96a931-81ed-4517-be6f3e2ed8de-7fde-4ba4";
-    const bunnyHostname = "spicifyapp.b-cdn.net";
-
+   static async upload(file) {
     if (!file) throw new Error("No file provided");
 
-    const response = await fetch(
-      `https://${bunnyHostname}/${bunnyStorageZone}/${path}`,
-      {
-        method: "PUT",
-        headers: {
-          AccessKey: bunnyAccessKey,
-          "Content-Type": file.type,
-        },
-        body: file,
-      }
-    );
+    const formData = new FormData();
+    formData.append("file", file); // your backend handles the file and path
+
+    const response = await fetch("https://inzi.genetum.com/bunnyupload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(`Bunny upload failed: ${response.statusText}`);
+      throw new Error(data.message || "Upload failed");
     }
 
-    return `https://spicifyapp.b-cdn.net/${path}`;
+    return data.fileUrl; // the uploaded Bunny file URL
   }
 }

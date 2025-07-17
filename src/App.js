@@ -13,6 +13,7 @@ import CategoriesManager from "./pages/categories"; // Updated import
 import SubscriberClubManager from "./pages/SubscriberClub";
 import Notifications from "./pages/Notifications";
 import ProfilePage from "./pages/ProfilePage"; // Updated import
+import EditBook from "./pages/editbook"; // ✅ NEW IMPORT
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="categories" element={<CategoriesManager />} />
             <Route path="audiobooks" element={<Audiobooks />} />
             <Route path="audiobooks/new" element={<Addbooks />} />
+            <Route path="audiobooks/edit/:id" element={<EditBook />} /> {/* ✅ NEW ROUTE */}
             <Route path="chapters" element={<Chapters />} />
             <Route path="users" element={<Users />} />
             <Route path="subscriber-club" element={<SubscriberClubManager />} />

@@ -82,22 +82,22 @@ export default function CategoriesManager() {
     <div className="max-w-2xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold mb-6">Genres Manager</h1>
 
-      {/* Add New Genre  */}
-      <div className="flex mb-6">
-        <input
-          type="text"
-          value={newCategory}
-          onChange={(e) => setNewCategory(e.target.value)}
-          placeholder="New category"
-          className="flex-grow px-4 py-2 border rounded-l-md"
-        />
-        <button
-          onClick={addCategory}
-          className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600"
-        >
-          Add
-        </button>
-      </div>
+      {/* Add New Genre */}
+<div className="flex mb-6">
+  <input
+    type="text"
+    value={newCategory}
+    onChange={(e) => setNewCategory(e.target.value)}
+    placeholder="New category"
+    className="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+  />
+  <button
+    onClick={addCategory}
+    className="bg-black text-white px-4 py-2 rounded-r-md hover:bg-gray-800 transition-colors ml-2"
+  >
+    Add
+  </button>
+</div>
 
       {/* Category List */}
       {categories.length === 0 ? (

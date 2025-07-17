@@ -28,8 +28,7 @@ export default function UserFormModal({
 
     try {
       setUploading(true);
-      const uniqueFileName = `user-profiles/${uuidv4()}.${file.name.split('.').pop()}`;
-      const url = await BunnyUploader.upload(file, uniqueFileName);
+      const url = await BunnyUploader.upload(file);
       setForm((prev) => ({ ...prev, profileImage: url }));
     } catch (err) {
       alert("Upload failed: " + err.message);
@@ -100,7 +99,7 @@ export default function UserFormModal({
                   <button
                     onClick={() => fileInputRef.current.click()}
                     disabled={uploading}
-                    className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                    className="bg-black text-white px-4 py-2 rounded"
                   >
                     {uploading ? "Uploading..." : "Choose File"}
                   </button>
@@ -139,7 +138,7 @@ export default function UserFormModal({
                 <button
                   onClick={onSubmit}
                   disabled={uploading}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded"
+                  className="bg-black text-white px-4 py-2 rounded"
                 >
                   {isEdit ? "Update" : "Add"}
                 </button>

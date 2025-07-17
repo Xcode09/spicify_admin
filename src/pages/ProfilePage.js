@@ -32,8 +32,7 @@ export default function ProfilePage () {
 
         // Upload new image if selected
       if (profileImage) {
-        const uniqueFileName = `profile-images/${user.uid}/${Date.now()}_${profileImage.name}`;
-        photoURL = await BunnyUploader.upload(profileImage, uniqueFileName);
+        photoURL = await BunnyUploader.upload(profileImage);
       }
       // Update display name
       await updateProfile(user, {
@@ -148,7 +147,7 @@ export default function ProfilePage () {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="bg-black text-white px-4 py-2 rounded"
             >
               {isSaving ? "Saving..." : "Save Changes"}
             </button>

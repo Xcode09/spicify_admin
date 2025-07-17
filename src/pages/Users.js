@@ -132,13 +132,49 @@ export default function Users() {
     }
     setIsModalOpen(false);
   };
+  const exportUsersToCSV = () => {
+  if (users.length === 0) return toast.info("No users to export");
+
+  const headers = [
+    "Name",
+    "Email",
+    "UID",
+    "Verified",
+    "Subscriber"
+  ];
+  const rows = users.map((user) => [
+    user.name || "",
+    user.email || "",
+    user.uid || "",
+    user.isVerified ? "Yes" : "No",
+    user.isSubscriber ? "Yes" : "No"
+  ]);
+
+  const csvContent =
+    [headers, ...rows]
+      .map((row) => row.map((field) => `"${field}"`).join(","))
+      .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "users.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  toast.success("Users exported successfully");
+};
+
 
   const filteredUsers = users.filter((user) =>
     user.email.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
-    <div className="p-6 max-w-5xl mx-auto text-white">
+    <div className="p-6 max-w-5xl mx-auto black-white">
       <h1 className="text-2xl font-bold mb-4">User Manager</h1>
 
       <div className="mb-4">
@@ -154,11 +190,11 @@ export default function Users() {
       {isAdmin && (
         <div className="mb-6">
           <button
-            onClick={openAddUserModal}
-            className="bg-indigo-600 text-white px-4 py-2 rounded"
-          >
-            Add User
-          </button>
+      onClick={exportUsersToCSV}
+      className="bg-black text-white px-4 py-2 rounded"
+    >
+      Export Users
+    </button>
         </div>
       )}
 
