@@ -14,7 +14,7 @@ export default function Addbooks() {
   const [language, setLanguage] = useState("");
   const [teaserQuote, setTeaserQuote] = useState("");
   const [tags, setTags] = useState([]);
-  const [rate, setRate] = useState(0);
+  const [spiceLevel, setSpiceLevel] = useState("Mild"); // Default to first option
   const [coverFile, setCoverFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +57,6 @@ export default function Addbooks() {
     }
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -91,12 +90,11 @@ export default function Addbooks() {
         summary: description,
         language,
         tags,
-        rate: Number(rate),
+        spiceLevel, // Use the selected spice level
         bookCover: bookCoverUrl,
         audioUrl,
         isRecommended,
         teaserQuote,
-        spiceLevel: spiceLevels[Math.floor(Math.random() * spiceLevels.length)],
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now()
       };
@@ -161,16 +159,18 @@ export default function Addbooks() {
         />
 
         <div className="col-span-1">
-          <label className="block mb-1 text-gray-400">Rating (0-5)</label>
-          <input
-            type="number"
-            min="0"
-            max="5"
-            step="0.1"
-            value={rate}
-            onChange={(e) => setRate(e.target.value)}
+          <label className="block mb-1 text-gray-400">Spice Level</label>
+          <select
+            value={spiceLevel}
+            onChange={(e) => setSpiceLevel(e.target.value)}
             className="p-2 bg-gray-800 border border-gray-700 rounded w-full"
-          />
+          >
+            {spiceLevels.map((level) => (
+              <option key={level} value={level}>
+                {level}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="col-span-1 flex items-center">
@@ -229,16 +229,6 @@ export default function Addbooks() {
             required
           />
         </div>
-
-        {/* <div className="col-span-1">
-          <label className="block mb-1 text-gray-400">Audio File</label>
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={(e) => setAudioFile(e.target.files[0])}
-            className="p-2 bg-gray-800 border border-gray-700 rounded w-full"
-          />
-        </div> */}
 
         <div className="col-span-1 md:col-span-2">
           <button

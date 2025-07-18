@@ -1,71 +1,54 @@
 // src/services/NotificationService.js
+const API_BASE_URL = 'https://inzi.genetum.com'; // Replace with your actual API URL
 
-const API_BASE = "http://localhost:5001"; // Change in production
-
-export default class NotificationService {
-  /**
-   * Create and save a new notification to Firestore via Node.js API
-   * @param {{
-   *  title: string,
-   *  message: string,
-   *  status: 'draft' | 'scheduled' | 'sent',
-   *  scheduledAt?: Date,
-   *  deepLink?: string,
-   *  richFormat?: {
-   *    bold?: boolean,
-   *    italic?: boolean,
-   *    lineBreaks?: boolean,
-   *    emojis?: boolean
-   *  },
-   *  target?: 'all' | 'subscribers' | string[] // e.g., userIds
-   * }} data
-   */
-  static async createNotification(data) {
+// src/services/NotificationService.js
+export default {
+  async sendNotification(notificationData, imageFile) {
     try {
-      const res = await fetch(`${API_BASE}/notifications`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+      const formData = new FormData();
+      formData.append('title', notificationData.title);
+      formData.append('body', notificationData.message);
+      
+      if (notificationData.scheduledAt) {
+        formData.append('scheduledAt', notificationData.scheduledAt);
+      }
+      
+      if (imageFile) {
+        formData.append('file', imageFile);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/send-notification`, {
+        method: 'POST',
+        body: formData,
       });
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Failed to create notification");
+      const result = await response.json();
 
-      return result;
+      if (!response.ok) {
+        // Handle API-level errors (4xx, 5xx)
+        return {
+          success: false,
+          error: result.error || "Request failed",
+          code: result.code || "API_ERROR",
+          status: response.status,
+          details: result.details
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+        message: result.message
+      };
+
     } catch (error) {
-      console.error("Error creating notification:", error);
-      return { success: false, error: error.message };
+      // Handle network errors or JSON parsing errors
+      return {
+        success: false,
+        error: "Network error occurred",
+        code: "NETWORK_ERROR",
+        details: error.message
+      };
     }
   }
-
-  /**
-   * Send a notification immediately via Node.js FCM API
-   * @param {{
-   *  title: string,
-   *  message: string,
-   *  deepLink?: string,
-   *  tokens: string[]
-   * }} payload
-   */
-  static async sendNotificationViaFCM(payload) {
-    try {
-      const res = await fetch(`${API_BASE}/send-notification`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Failed to send notification");
-
-      return result;
-    } catch (error) {
-      console.error("FCM send failed:", error);
-      return { success: false, error: error.message };
-    }
-  }
-}
+};

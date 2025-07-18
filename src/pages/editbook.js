@@ -17,7 +17,7 @@ export default function EditBook() {
   const [language, setLanguage] = useState("");
   const [teaserQuote, setTeaserQuote] = useState("");
   const [tags, setTags] = useState([]);
-  const [rate, setRate] = useState(0);
+  const [spiceLevel, setSpiceLevel] = useState("Mild"); // Changed from rate to spiceLevel
   const [coverFile, setCoverFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ export default function EditBook() {
           setDescription(book.summary || "");
           setLanguage(book.language || "");
           setTags(book.tags || []);
-          setRate(book.rate || 0);
+          setSpiceLevel(book.spiceLevel || "Mild"); // Set spiceLevel instead of rate
           setIsRecommended(book.isRecommended || false);
           setTeaserQuote(book.teaserQuote || "");
           setExistingCover(book.bookCover || "");
@@ -97,7 +97,7 @@ export default function EditBook() {
         summary: description,
         language,
         tags,
-        rate: Number(rate),
+        spiceLevel, // Use spiceLevel instead of rate
         bookCover: bookCoverUrl,
         audioUrl,
         isRecommended,
@@ -163,17 +163,19 @@ export default function EditBook() {
           className="p-2 bg-gray-800 border border-gray-700 rounded"
         />
 
-        <div>
-          <label className="text-gray-400 block mb-1">Rating</label>
-          <input
-            type="number"
-            min="0"
-            max="5"
-            step="0.1"
-            value={rate}
-            onChange={(e) => setRate(e.target.value)}
+        <div className="col-span-1">
+          <label className="block mb-1 text-gray-400">Spice Level</label>
+          <select
+            value={spiceLevel}
+            onChange={(e) => setSpiceLevel(e.target.value)}
             className="p-2 bg-gray-800 border border-gray-700 rounded w-full"
-          />
+          >
+            {spiceLevels.map((level) => (
+              <option key={level} value={level}>
+                {level}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex items-center">
