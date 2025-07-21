@@ -1,9 +1,9 @@
 // src/pages/NotificationEditor.js
 import React, { useState, useRef } from "react";
 import { toast } from "react-toastify";
-import NotificationService from "../services/NotificationService";
+import NotificationService from "../../services/NotificationService";
 
-export default function Notifications() {
+export default function NotificationEditor() {
   const [form, setForm] = useState({
     title: "",
     message: "",

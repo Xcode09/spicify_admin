@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import BunnyUploader from "../services/BunnyUploader";
 
-const spiceLevels = ["Mild", "Medium", "Spicy", "Extreme"];
+const spiceLevels = ["Level 1", "Level 2", "Level 3", "Level 4", "Level 5"];
 
 export default function Addbooks() {
   const [title, setTitle] = useState("");
