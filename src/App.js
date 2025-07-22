@@ -17,6 +17,7 @@ import NotificationList from "./pages/notifications/NotificationList";
 import NotificationEditor from "./pages/notifications/NotificationEditor";
 import ProfilePage from "./pages/ProfilePage"; // Updated import
 import EditBook from "./pages/editbook"; // ✅ NEW IMPORT
+import ErrorDashboard from './components/ErrorDashboard';
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
               <Route path="create" element={<NotificationEditor />} />
             </Route>
             <Route path="/dashboard/profile" element={<ProfilePage />} />
+            <Route path="/dashboard/errors" element={<ErrorDashboard />} />
           </Route>
         </Routes>
         <ToastContainer position="bottom-center" theme="dark" />

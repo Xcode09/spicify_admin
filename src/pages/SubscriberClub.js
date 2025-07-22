@@ -101,7 +101,7 @@ const [editingPost, setEditingPost] = useState(null);
   const updateClubDoc = async () => {
   try {
     setLoading(true);
-    const toastId = toast.loading('Saving club configuration...');
+    toast.loading('Saving club configuration...');
     
     // Create a copy of the form data
     const formData = { ...form };
@@ -153,8 +153,8 @@ const [editingPost, setEditingPost] = useState(null);
 
     // Save to Firestore
     await setDoc(clubDocRef, firestoreData);
-
     toast.success('Club configuration updated successfully!');
+    toast.dismiss();
     setLoading(false);
   } catch (error) {
     console.error("Error updating club data:", error);
@@ -448,681 +448,659 @@ const toggleLike = async (post) => {
   };
 
   return (
-    <div className="p-4 space-y-6">
-      <h1 className="text-2xl font-bold">Subscriber Club Manager</h1>
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
+       {/* Header Section */}
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Subscriber Club Manager</h1>
+        <p className="text-gray-600 mt-2">Manage all subscriber-exclusive content and features</p>
+      </header>
 
       {/* Club Data Section */}
-<div className="bg-white p-4 rounded shadow space-y-4">
-  <h2 className="text-xl font-semibold">Club Configuration</h2>
-  
-  {/* Welcome Message */}
-  <div className="space-y-2">
-    <label className="block font-medium">Welcome Message</label>
-    <input
-      className="w-full border px-4 py-2 rounded"
-      placeholder="Welcome your subscribers..."
-      value={form.welcomeMessage}
-      onChange={(e) => setForm({ ...form, welcomeMessage: e.target.value })}
-    />
-  </div>
-
-  {/* Quote of the Week */}
-  <div className="space-y-2">
-    <label className="block font-medium">Quote of the Week</label>
-    <input
-      className="w-full border px-4 py-2 rounded"
-      placeholder="Inspirational quote for subscribers..."
-      value={form.quoteOfWeek}
-      onChange={(e) => setForm({ ...form, quoteOfWeek: e.target.value })}
-    />
-  </div>
-
-  {/* Sneak Peek Section */}
-{/* Sneak Peek Section */}
-<div className="border-t pt-4 mt-4">
-  <h3 className="font-bold mb-2">Sneak Peek Content</h3>
-  <p className="text-sm text-gray-600 mb-2">Preview of upcoming content for subscribers</p>
-  
-  <div className="space-y-4">
-    {/* Image Section */}
-    <div>
-      <label className="block font-medium mb-1">Image</label>
-      <div className="flex gap-2">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              const url = URL.createObjectURL(file);
-              setForm({
-                ...form,
-                sneakPeek: { 
-                  ...form.sneakPeek, 
-                  imageFile: file, 
-                  imageUrl: url 
-                }
-              });
-            }
-          }}
-          className="hidden"
-          id="sneakPeekImageUpload"
-        />
-        <label
-          htmlFor="sneakPeekImageUpload"
-          className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded cursor-pointer border border-gray-300 transition-colors"
-        >
-          {form.sneakPeek.imageFile ? 'Change Image' : 'Choose Image'}
-        </label>
-        <input
-          className="flex-1 border px-4 py-2 rounded"
-          placeholder="Or enter image URL"
-          value={form.sneakPeek.imageUrl}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              sneakPeek: { 
-                ...form.sneakPeek, 
-                imageUrl: e.target.value, 
-                imageFile: null 
-              },
-            })
-          }
-        />
-        {form.sneakPeek.imageFile && (
+ {/* Club Configuration Section */}
+      <section className="bg-white rounded-xl shadow-md p-6">
+        <div className="flex justify-between items-center border-b pb-4 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Club Configuration</h2>
           <button
-            onClick={() => setForm({
-              ...form,
-              sneakPeek: { 
-                ...form.sneakPeek, 
-                imageUrl: '', 
-                imageFile: null 
-              }
-            })}
-            className="text-red-500 hover:text-red-700"
+            onClick={updateClubDoc}
+            className="bg-black hover:bg-gray-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
           >
-            Clear
+            Save Configuration
           </button>
-        )}
-      </div>
-      {form.sneakPeek.imageUrl && (
-        <div className="mt-2">
-          <img 
-            src={form.sneakPeek.imageUrl} 
-            alt="Preview" 
-            className="max-h-40 rounded border"
+        </div>
+
+        {/* Welcome Message */}
+        <div className="mb-6">
+          <label className="block text-lg font-medium text-gray-700 mb-2">Welcome Message</label>
+          <textarea
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Welcome your subscribers with a friendly message..."
+            value={form.welcomeMessage}
+            onChange={(e) => setForm({ ...form, welcomeMessage: e.target.value })}
+            rows={3}
           />
         </div>
-      )}
-      {form.sneakPeek.imageFile && (
-        <p className="text-sm text-gray-500 mt-1">
-          New image selected (will be uploaded when you save)
-        </p>
-      )}
-    </div>
 
-    {/* Audio Section */}
-    <div>
-      <label className="block font-medium mb-1">Audio</label>
-      <div className="flex gap-2">
-        <input
-          type="file"
-          accept="audio/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              const url = URL.createObjectURL(file);
-              setForm({
-                ...form,
-                sneakPeek: { 
-                  ...form.sneakPeek, 
-                  audioFile: file, 
-                  audioUrl: url 
-                }
-              });
-            }
-          }}
-          className="hidden"
-          id="sneakPeekAudioUpload"
-        />
-        <label
-          htmlFor="sneakPeekAudioUpload"
-          className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded cursor-pointer border border-gray-300 transition-colors"
-        >
-          {form.sneakPeek.audioFile ? 'Change Audio' : 'Choose Audio'}
-        </label>
-        <input
-          className="flex-1 border px-4 py-2 rounded"
-          placeholder="Or enter audio URL"
-          value={form.sneakPeek.audioUrl}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              sneakPeek: { 
-                ...form.sneakPeek, 
-                audioUrl: e.target.value, 
-                audioFile: null 
-              },
-            })
-          }
-        />
-        {form.sneakPeek.audioFile && (
-          <button
-            onClick={() => setForm({
-              ...form,
-              sneakPeek: { 
-                ...form.sneakPeek, 
-                audioUrl: '', 
-                audioFile: null 
-              }
-            })}
-            className="text-red-500 hover:text-red-700"
-          >
-            Clear
-          </button>
-        )}
-      </div>
-      {form.sneakPeek.audioUrl && (
-        <div className="mt-2">
-          <audio controls src={form.sneakPeek.audioUrl} className="w-full" />
+        {/* Quote of the Week */}
+        <div className="mb-6">
+          <label className="block text-lg font-medium text-gray-700 mb-2">Quote of the Week</label>
+          <textarea
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Inspire your subscribers with a weekly quote..."
+            value={form.quoteOfWeek}
+            onChange={(e) => setForm({ ...form, quoteOfWeek: e.target.value })}
+            rows={2}
+          />
         </div>
-      )}
-      {form.sneakPeek.audioFile && (
-        <p className="text-sm text-gray-500 mt-1">
-          New audio selected (will be uploaded when you save)
-        </p>
-      )}
-    </div>
-  </div>
-</div>
 
-{/* Holiday Special Section */}
-<div className="border-t pt-4 mt-4">
-  <div className="flex items-center gap-2 mb-2">
-    <input
-      type="checkbox"
-      id="holidayToggle"
-      checked={form.isHolidaySpecial}
-      onChange={(e) => setForm({ ...form, isHolidaySpecial: e.target.checked })}
-      className="h-4 w-4"
-    />
-    <label htmlFor="holidayToggle" className="font-bold cursor-pointer">
-      Holiday Special
-    </label>
-  </div>
-  
-  {form.isHolidaySpecial && (
-    <div className="space-y-4 bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-      {/* Title Section (unchanged) */}
-      <div>
-        <label className="block font-medium mb-1">Title</label>
-        <input
-          className="w-full border px-4 py-2 rounded"
-          value={form.holidaySpecial.title}
-          onChange={(e) => setForm({
-            ...form,
-            holidaySpecial: { ...form.holidaySpecial, title: e.target.value }
-          })}
-        />
-      </div>
-
-      {/* Updated Image Section */}
-      <div>
-        <label className="block font-medium mb-1">Holiday Image</label>
-        <div className="flex gap-2 items-center">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const previewUrl = URL.createObjectURL(file);
-                setForm({
-                  ...form,
-                  holidaySpecial: {
-                    ...form.holidaySpecial,
-                    imageFile: file,
-                    imageUrl: previewUrl
+        {/* Sneak Peek Section */}
+        <div className="border-t pt-6 mb-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Sneak Peek Content</h3>
+          <p className="text-gray-600 mb-4">Preview of upcoming exclusive content for subscribers</p>
+          
+          {/* Image Upload */}
+          <div className="mb-6">
+            <label className="block text-lg font-medium text-gray-700 mb-2">Preview Image</label>
+            <div className="flex gap-3 items-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    setForm({
+                      ...form,
+                      sneakPeek: { 
+                        ...form.sneakPeek, 
+                        imageFile: file, 
+                        imageUrl: url 
+                      }
+                    });
                   }
-                });
-              }
-            }}
-            className="hidden"
-            id="holidayImageUpload"
-          />
-          <label
-            htmlFor="holidayImageUpload"
-            className="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded cursor-pointer border border-yellow-300 transition-colors"
-          >
-            {form.holidaySpecial.imageFile ? 'Change Image' : 'Choose Image'}
-          </label>
-          <input
-            className="flex-1 border px-4 py-2 rounded"
-            placeholder="Or enter image URL"
-            value={form.holidaySpecial.imageUrl}
-            onChange={(e) => setForm({
-              ...form,
-              holidaySpecial: {
-                ...form.holidaySpecial,
-                imageUrl: e.target.value,
-                imageFile: null
-              }
-            })}
-          />
-          {form.holidaySpecial.imageFile && (
-            <button
-              onClick={() => setForm({
-                ...form,
-                holidaySpecial: {
-                  ...form.holidaySpecial,
-                  imageUrl: '',
-                  imageFile: null
+                }}
+                className="hidden"
+                id="sneakPeekImageUpload"
+              />
+              <label
+                htmlFor="sneakPeekImageUpload"
+                className="bg-gray-100 hover:bg-gray-200 px-4 py-2.5 rounded-lg cursor-pointer border border-gray-300 transition-colors font-medium"
+              >
+                {form.sneakPeek.imageFile ? 'Change Image' : 'Upload Image'}
+              </label>
+              <input
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Or paste image URL"
+                value={form.sneakPeek.imageUrl}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    sneakPeek: { 
+                      ...form.sneakPeek, 
+                      imageUrl: e.target.value, 
+                      imageFile: null 
+                    },
+                  })
                 }
-              })}
-              className="text-red-500 hover:text-red-700"
-            >
-              Clear
-            </button>
-          )}
+              />
+              {form.sneakPeek.imageFile && (
+                <button
+                  onClick={() => setForm({
+                    ...form,
+                    sneakPeek: { 
+                      ...form.sneakPeek, 
+                      imageUrl: '', 
+                      imageFile: null 
+                    }
+                  })}
+                  className="text-red-500 hover:text-red-700 px-3 py-2"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {form.sneakPeek.imageUrl && (
+              <div className="mt-3">
+                <img 
+                  src={form.sneakPeek.imageUrl} 
+                  alt="Preview" 
+                  className="max-h-60 rounded-lg border shadow-sm"
+                />
+              </div>
+            )}
+            {form.sneakPeek.imageFile && (
+              <p className="text-sm text-gray-500 mt-2">
+                Image selected (will be uploaded when you save)
+              </p>
+            )}
+          </div>
+
+          {/* Audio Upload */}
+          <div className="mb-6">
+            <label className="block text-lg font-medium text-gray-700 mb-2">Preview Audio</label>
+            <div className="flex gap-3 items-center">
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    setForm({
+                      ...form,
+                      sneakPeek: { 
+                        ...form.sneakPeek, 
+                        audioFile: file, 
+                        audioUrl: url 
+                      }
+                    });
+                  }
+                }}
+                className="hidden"
+                id="sneakPeekAudioUpload"
+              />
+              <label
+                htmlFor="sneakPeekAudioUpload"
+                className="bg-gray-100 hover:bg-gray-200 px-4 py-2.5 rounded-lg cursor-pointer border border-gray-300 transition-colors font-medium"
+              >
+                {form.sneakPeek.audioFile ? 'Change Audio' : 'Upload Audio'}
+              </label>
+              <input
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Or paste audio URL"
+                value={form.sneakPeek.audioUrl}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    sneakPeek: { 
+                      ...form.sneakPeek, 
+                      audioUrl: e.target.value, 
+                      audioFile: null 
+                    },
+                  })
+                }
+              />
+              {form.sneakPeek.audioFile && (
+                <button
+                  onClick={() => setForm({
+                    ...form,
+                    sneakPeek: { 
+                      ...form.sneakPeek, 
+                      audioUrl: '', 
+                      audioFile: null 
+                    }
+                  })}
+                  className="text-red-500 hover:text-red-700 px-3 py-2"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {form.sneakPeek.audioUrl && (
+              <div className="mt-3">
+                <audio controls src={form.sneakPeek.audioUrl} className="w-full rounded-lg" />
+              </div>
+            )}
+            {form.sneakPeek.audioFile && (
+              <p className="text-sm text-gray-500 mt-2">
+                Audio selected (will be uploaded when you save)
+              </p>
+            )}
+          </div>
         </div>
-        {form.holidaySpecial.imageUrl && (
-          <div className="mt-2">
-            <img 
-              src={form.holidaySpecial.imageUrl} 
-              alt="Holiday Preview" 
-              className="max-h-40 rounded border"
-              onLoad={() => {
-                if (form.holidaySpecial.imageUrl?.startsWith('blob:')) {
-                  URL.revokeObjectURL(form.holidaySpecial.imageUrl);
-                }
-              }}
+
+        {/* Holiday Special Section */}
+        <div className="border-t pt-6">
+          <div className="flex items-center gap-3 mb-4">
+            <input
+              type="checkbox"
+              id="holidayToggle"
+              checked={form.isHolidaySpecial}
+              onChange={(e) => setForm({ ...form, isHolidaySpecial: e.target.checked })}
+              className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500"
             />
-            {form.holidaySpecial.imageFile && (
-              <p className="text-sm text-gray-500 mt-1">
-                Preview (will be uploaded when saved)
-              </p>
-            )}
+            <label htmlFor="holidayToggle" className="text-lg font-semibold text-gray-800 cursor-pointer">
+              Enable Holiday Special
+            </label>
           </div>
-        )}
-      </div>
+          
+          {form.isHolidaySpecial && (
+            <div className="bg-yellow-50 p-5 rounded-lg border border-yellow-200 space-y-4">
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Holiday Title</label>
+                <input
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Special holiday title..."
+                  value={form.holidaySpecial.title}
+                  onChange={(e) => setForm({
+                    ...form,
+                    holidaySpecial: { ...form.holidaySpecial, title: e.target.value }
+                  })}
+                />
+              </div>
 
-      {/* Updated Audio Section */}
-      <div>
-        <label className="block font-medium mb-1">Holiday Audio</label>
-        <div className="flex gap-2 items-center">
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const previewUrl = URL.createObjectURL(file);
-                setForm({
-                  ...form,
-                  holidaySpecial: {
-                    ...form.holidaySpecial,
-                    audioFile: file,
-                    audioUrl: previewUrl
-                  }
-                });
-              }
-            }}
-            className="hidden"
-            id="holidayAudioUpload"
-          />
-          <label
-            htmlFor="holidayAudioUpload"
-            className="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded cursor-pointer border border-yellow-300 transition-colors"
-          >
-            {form.holidaySpecial.audioFile ? 'Change Audio' : 'Choose Audio'}
-          </label>
-          <input
-            className="flex-1 border px-4 py-2 rounded"
-            placeholder="Or enter audio URL"
-            value={form.holidaySpecial.audioUrl}
-            onChange={(e) => setForm({
-              ...form,
-              holidaySpecial: {
-                ...form.holidaySpecial,
-                audioUrl: e.target.value,
-                audioFile: null
-              }
-            })}
-          />
-          {form.holidaySpecial.audioFile && (
-            <button
-              onClick={() => setForm({
-                ...form,
-                holidaySpecial: {
-                  ...form.holidaySpecial,
-                  audioUrl: '',
-                  audioFile: null
-                }
-              })}
-              className="text-red-500 hover:text-red-700"
-            >
-              Clear
-            </button>
+              {/* Holiday Image */}
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Holiday Image</label>
+                <div className="flex gap-3 items-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const previewUrl = URL.createObjectURL(file);
+                        setForm({
+                          ...form,
+                          holidaySpecial: {
+                            ...form.holidaySpecial,
+                            imageFile: file,
+                            imageUrl: previewUrl
+                          }
+                        });
+                      }
+                    }}
+                    className="hidden"
+                    id="holidayImageUpload"
+                  />
+                  <label
+                    htmlFor="holidayImageUpload"
+                    className="bg-yellow-100 hover:bg-yellow-200 px-4 py-2.5 rounded-lg cursor-pointer border border-yellow-300 transition-colors font-medium"
+                  >
+                    {form.holidaySpecial.imageFile ? 'Change Image' : 'Upload Image'}
+                  </label>
+                  <input
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Or paste image URL"
+                    value={form.holidaySpecial.imageUrl}
+                    onChange={(e) => setForm({
+                      ...form,
+                      holidaySpecial: {
+                        ...form.holidaySpecial,
+                        imageUrl: e.target.value,
+                        imageFile: null
+                      }
+                    })}
+                  />
+                  {form.holidaySpecial.imageFile && (
+                    <button
+                      onClick={() => setForm({
+                        ...form,
+                        holidaySpecial: {
+                          ...form.holidaySpecial,
+                          imageUrl: '',
+                          imageFile: null
+                        }
+                      })}
+                      className="text-red-500 hover:text-red-700 px-3 py-2"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                {form.holidaySpecial.imageUrl && (
+                  <div className="mt-3">
+                    <img 
+                      src={form.holidaySpecial.imageUrl} 
+                      alt="Holiday Preview" 
+                      className="max-h-60 rounded-lg border shadow-sm"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Holiday Audio */}
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Holiday Audio</label>
+                <div className="flex gap-3 items-center">
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const previewUrl = URL.createObjectURL(file);
+                        setForm({
+                          ...form,
+                          holidaySpecial: {
+                            ...form.holidaySpecial,
+                            audioFile: file,
+                            audioUrl: previewUrl
+                          }
+                        });
+                      }
+                    }}
+                    className="hidden"
+                    id="holidayAudioUpload"
+                  />
+                  <label
+                    htmlFor="holidayAudioUpload"
+                    className="bg-yellow-100 hover:bg-yellow-200 px-4 py-2.5 rounded-lg cursor-pointer border border-yellow-300 transition-colors font-medium"
+                  >
+                    {form.holidaySpecial.audioFile ? 'Change Audio' : 'Upload Audio'}
+                  </label>
+                  <input
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Or paste audio URL"
+                    value={form.holidaySpecial.audioUrl}
+                    onChange={(e) => setForm({
+                      ...form,
+                      holidaySpecial: {
+                        ...form.holidaySpecial,
+                        audioUrl: e.target.value,
+                        audioFile: null
+                      }
+                    })}
+                  />
+                  {form.holidaySpecial.audioFile && (
+                    <button
+                      onClick={() => setForm({
+                        ...form,
+                        holidaySpecial: {
+                          ...form.holidaySpecial,
+                          audioUrl: '',
+                          audioFile: null
+                        }
+                      })}
+                      className="text-red-500 hover:text-red-700 px-3 py-2"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                {form.holidaySpecial.audioUrl && (
+                  <div className="mt-3">
+                    <audio controls src={form.holidaySpecial.audioUrl} className="w-full rounded-lg" />
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
-        {form.holidaySpecial.audioUrl && (
-          <div className="mt-2">
-            <audio controls src={form.holidaySpecial.audioUrl} className="w-full" />
-            {form.holidaySpecial.audioFile && (
-              <p className="text-sm text-gray-500 mt-1">
-                Preview (will be uploaded when saved)
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )}
-</div>
-
-
-  <button
-    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4"
-    onClick={updateClubDoc}
-  >
-    Save Club Configuration
-  </button>
-</div>
+      </section>
 
       {/* Bonus Scenes Section */}
-<div className="bg-white p-4 rounded shadow">
-  <h2 className="text-xl font-semibold">Bonus Scenes</h2>
-  <button
-    onClick={handleSceneAdd}
-    className="bg-green-600 text-white px-4 py-2 rounded my-2 hover:bg-green-700"
-  >
-    Add New Scene
-  </button>
-  
-  {bonusScenes.map((scene) => (
-    <div key={scene.id} className="bg-gray-50 p-4 rounded shadow space-y-2 mb-4">
-      <input
-        className="w-full border px-4 py-2 rounded"
-        placeholder="Title"
-        value={scene.title}
-        onChange={(e) => handleSceneUpdate(scene.id, 'title', e.target.value)}
-      />
-      
-      {/* Image Section */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Scene Image</label>
-        <div className="flex gap-2 items-center">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                try {
-                  // Show preview immediately
-                  const previewUrl = URL.createObjectURL(file);
-                  setBonusScenes(bonusScenes.map(s => 
-                    s.id === scene.id ? { 
-                      ...s, 
-                      imageFile: file,
-                      imageUrl: previewUrl 
-                    } : s
-                  ));
-                  
-                  // Upload to Bunny.net and update Firestore
-                  const imageUrl = await BunnyUploader.upload(file);
-                  await handleSceneUpdate(scene.id, 'imageUrl', imageUrl);
-                  
-                  // Clean up blob URL after upload is complete
-                  URL.revokeObjectURL(previewUrl);
-                } catch (error) {
-                  toast.error(`Image upload failed: ${error.message}`);
-                  // Revert to previous state if upload fails
-                  loadData();
-                }
-              }
-            }}
-            className="hidden"
-            id={`sceneImageUpload-${scene.id}`}
-          />
-          <label
-            htmlFor={`sceneImageUpload-${scene.id}`}
-            className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded cursor-pointer text-sm"
+{/* Bonus Scenes Section */}
+      <section className="bg-white rounded-xl shadow-md p-6">
+        <div className="flex justify-between items-center border-b pb-4 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Bonus Scenes</h2>
+          <button
+            onClick={handleSceneAdd}
+            className="bg-black hover:bg-gray-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
           >
-            {scene.imageFile ? 'Change Image' : 'Choose Image'}
-          </label>
-          <input
-            className="flex-1 border px-4 py-2 rounded text-sm"
-            placeholder="Image URL"
-            value={scene.imageUrl}
-            onChange={(e) => {
-              handleSceneUpdate(scene.id, 'imageUrl', e.target.value);
-              // Clear any selected file when URL is manually entered
-              setBonusScenes(bonusScenes.map(s => 
-                s.id === scene.id ? { ...s, imageFile: null } : s
-              ));
-            }}
-          />
-          {scene.imageFile && (
-            <button
-              onClick={() => {
-                setBonusScenes(bonusScenes.map(s => 
-                  s.id === scene.id ? { 
-                    ...s, 
-                    imageFile: null,
-                    imageUrl: '' 
-                  } : s
-                ));
-                handleSceneUpdate(scene.id, 'imageUrl', '');
-              }}
-              className="text-red-500 hover:text-red-700 text-sm"
-            >
-              Clear
-            </button>
-          )}
+            Add New Scene
+          </button>
         </div>
-        {scene.imageUrl && (
-          <div className="mt-2">
-            <img 
-              src={scene.imageUrl} 
-              alt="Scene Preview" 
-              className="max-h-40 rounded border"
-              onLoad={() => {
-                // Clean up blob URL if it's a local preview
-                if (scene.imageUrl.startsWith('blob:')) {
-                  URL.revokeObjectURL(scene.imageUrl);
-                }
-              }}
-            />
-            {scene.imageFile && (
-              <p className="text-sm text-gray-500 mt-1">
-                Uploading image... (preview only)
-              </p>
-            )}
+        
+        {bonusScenes.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No bonus scenes added yet</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {bonusScenes.map((scene) => (
+              <div key={scene.id} className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                <input
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-medium"
+                  placeholder="Scene Title"
+                  value={scene.title}
+                  onChange={(e) => handleSceneUpdate(scene.id, 'title', e.target.value)}
+                />
+                
+                {/* Scene Image */}
+                <div className="mb-6">
+                  <label className="block text-lg font-medium text-gray-700 mb-2">Scene Image</label>
+                  <div className="flex gap-3 items-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          try {
+                            const previewUrl = URL.createObjectURL(file);
+                            setBonusScenes(bonusScenes.map(s => 
+                              s.id === scene.id ? { 
+                                ...s, 
+                                imageFile: file,
+                                imageUrl: previewUrl 
+                              } : s
+                            ));
+                            const imageUrl = await BunnyUploader.upload(file);
+                            await handleSceneUpdate(scene.id, 'imageUrl', imageUrl);
+                            URL.revokeObjectURL(previewUrl);
+                          } catch (error) {
+                            toast.error(`Image upload failed: ${error.message}`);
+                            loadData();
+                          }
+                        }
+                      }}
+                      className="hidden"
+                      id={`sceneImageUpload-${scene.id}`}
+                    />
+                    <label
+                      htmlFor={`sceneImageUpload-${scene.id}`}
+                      className="bg-gray-200 hover:bg-gray-300 px-4 py-2.5 rounded-lg cursor-pointer border border-gray-300 transition-colors font-medium"
+                    >
+                      {scene.imageFile ? 'Change Image' : 'Upload Image'}
+                    </label>
+                    <input
+                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Or paste image URL"
+                      value={scene.imageUrl}
+                      onChange={(e) => {
+                        handleSceneUpdate(scene.id, 'imageUrl', e.target.value);
+                        setBonusScenes(bonusScenes.map(s => 
+                          s.id === scene.id ? { ...s, imageFile: null } : s
+                        ));
+                      }}
+                    />
+                    {scene.imageFile && (
+                      <button
+                        onClick={() => {
+                          setBonusScenes(bonusScenes.map(s => 
+                            s.id === scene.id ? { 
+                              ...s, 
+                              imageFile: null,
+                              imageUrl: '' 
+                            } : s
+                          ));
+                          handleSceneUpdate(scene.id, 'imageUrl', '');
+                        }}
+                        className="text-red-500 hover:text-red-700 px-3 py-2"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  {scene.imageUrl && (
+                    <div className="mt-3">
+                      <img 
+                        src={scene.imageUrl} 
+                        alt="Scene Preview" 
+                        className="max-h-60 rounded-lg border shadow-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Scene Audio */}
+                <div className="mb-6">
+                  <label className="block text-lg font-medium text-gray-700 mb-2">Scene Audio</label>
+                  <div className="flex gap-3 items-center">
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          try {
+                            const previewUrl = URL.createObjectURL(file);
+                            setBonusScenes(bonusScenes.map(s => 
+                              s.id === scene.id ? { 
+                                ...s, 
+                                audioFile: file,
+                                audioUrl: previewUrl 
+                              } : s
+                            ));
+                            const audioUrl = await BunnyUploader.upload(file);
+                            await handleSceneUpdate(scene.id, 'audioUrl', audioUrl);
+                            URL.revokeObjectURL(previewUrl);
+                          } catch (error) {
+                            toast.error(`Audio upload failed: ${error.message}`);
+                            loadData();
+                          }
+                        }
+                      }}
+                      className="hidden"
+                      id={`sceneAudioUpload-${scene.id}`}
+                    />
+                    <label
+                      htmlFor={`sceneAudioUpload-${scene.id}`}
+                      className="bg-gray-200 hover:bg-gray-300 px-4 py-2.5 rounded-lg cursor-pointer border border-gray-300 transition-colors font-medium"
+                    >
+                      {scene.audioFile ? 'Change Audio' : 'Upload Audio'}
+                    </label>
+                    <input
+                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Or paste audio URL"
+                      value={scene.audioUrl}
+                      onChange={(e) => {
+                        handleSceneUpdate(scene.id, 'audioUrl', e.target.value);
+                        setBonusScenes(bonusScenes.map(s => 
+                          s.id === scene.id ? { ...s, audioFile: null } : s
+                        ));
+                      }}
+                    />
+                    {scene.audioFile && (
+                      <button
+                        onClick={() => {
+                          setBonusScenes(bonusScenes.map(s => 
+                            s.id === scene.id ? { 
+                              ...s, 
+                              audioFile: null,
+                              audioUrl: '' 
+                            } : s
+                          ));
+                          handleSceneUpdate(scene.id, 'audioUrl', '');
+                        }}
+                        className="text-red-500 hover:text-red-700 px-3 py-2"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  {scene.audioUrl && (
+                    <div className="mt-3">
+                      <audio controls src={scene.audioUrl} className="w-full rounded-lg" />
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => handleSceneDelete(scene.id)}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-medium transition-colors"
+                >
+                  Delete Scene
+                </button>
+              </div>
+            ))}
           </div>
         )}
-      </div>
-
-      {/* Audio Section */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Scene Audio</label>
-        <div className="flex gap-2 items-center">
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                try {
-                  // Show preview immediately
-                  const previewUrl = URL.createObjectURL(file);
-                  setBonusScenes(bonusScenes.map(s => 
-                    s.id === scene.id ? { 
-                      ...s, 
-                      audioFile: file,
-                      audioUrl: previewUrl 
-                    } : s
-                  ));
-                  
-                  // Upload to Bunny.net and update Firestore
-                  const audioUrl = await BunnyUploader.upload(file);
-                  await handleSceneUpdate(scene.id, 'audioUrl', audioUrl);
-                  
-                  // Clean up blob URL after upload is complete
-                  URL.revokeObjectURL(previewUrl);
-                } catch (error) {
-                  toast.error(`Audio upload failed: ${error.message}`);
-                  // Revert to previous state if upload fails
-                  loadData();
-                }
-              }
-            }}
-            className="hidden"
-            id={`sceneAudioUpload-${scene.id}`}
-          />
-          <label
-            htmlFor={`sceneAudioUpload-${scene.id}`}
-            className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded cursor-pointer text-sm"
-          >
-            {scene.audioFile ? 'Change Audio' : 'Choose Audio'}
-          </label>
-          <input
-            className="flex-1 border px-4 py-2 rounded text-sm"
-            placeholder="Audio URL"
-            value={scene.audioUrl}
-            onChange={(e) => {
-              handleSceneUpdate(scene.id, 'audioUrl', e.target.value);
-              // Clear any selected file when URL is manually entered
-              setBonusScenes(bonusScenes.map(s => 
-                s.id === scene.id ? { ...s, audioFile: null } : s
-              ));
-            }}
-          />
-          {scene.audioFile && (
-            <button
-              onClick={() => {
-                setBonusScenes(bonusScenes.map(s => 
-                  s.id === scene.id ? { 
-                    ...s, 
-                    audioFile: null,
-                    audioUrl: '' 
-                  } : s
-                ));
-                handleSceneUpdate(scene.id, 'audioUrl', '');
-              }}
-              className="text-red-500 hover:text-red-700 text-sm"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-        {scene.audioUrl && (
-          <div className="mt-2">
-            <audio controls src={scene.audioUrl} className="w-full" />
-            {scene.audioFile && (
-              <p className="text-sm text-gray-500 mt-1">
-                Uploading audio... (preview only)
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-
-      <button
-        onClick={() => handleSceneDelete(scene.id)}
-        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm"
-      >
-        Delete Scene
-      </button>
-    </div>
-  ))}
-</div>
+      </section>
 
       {/* Poll Management Section */}
-      <div className="bg-white p-4 rounded shadow space-y-4">
-        <h2 className="text-xl font-semibold">Poll Management</h2>
+       {/* Poll Management Section */}
+      <section className="bg-white rounded-xl shadow-md p-6">
+        <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4 mb-6">Poll Management</h2>
         
         {/* Create New Poll */}
-        <div className="border p-4 rounded">
-          <h3 className="font-bold mb-2">Create New Poll</h3>
+        <div className="border border-gray-200 p-6 rounded-xl mb-8">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Create New Poll</h3>
           <input
-            className="w-full border px-4 py-2 rounded mb-2"
-            placeholder="Poll question"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your poll question..."
             value={newPoll.question}
             onChange={(e) => setNewPoll({ ...newPoll, question: e.target.value })}
           />
-          <label className="flex gap-2 items-center mb-2">
+          
+          <div className="flex items-center gap-3 mb-4">
             <input
               type="checkbox"
               checked={newPoll.multiChoice}
               onChange={(e) => setNewPoll({ ...newPoll, multiChoice: e.target.checked })}
+              className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500"
             />
-            Allow multiple choice
-          </label>
+            <label className="text-lg font-medium text-gray-700">Allow multiple choice</label>
+          </div>
           
-          <div className="space-y-2 mb-2">
+          <div className="space-y-3 mb-6">
             {newPoll.options.map((opt, i) => (
-              <div key={i} className="flex gap-2 items-center">
-                <span className="font-bold">{opt.key}:</span>
+              <div key={i} className="flex gap-3 items-center">
+                <span className="font-bold text-lg w-6">{opt.key}:</span>
                 <input
-                  className="flex-1 border px-2 py-1 rounded"
+                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder={`Option ${opt.key}`}
                   value={opt.label}
                   onChange={(e) => updatePollOption(i, 'label', e.target.value)}
                 />
                 <button
-                  className="text-sm text-red-600 hover:text-red-800"
+                  className="text-red-500 hover:text-red-700 w-9 h-9 flex items-center justify-center rounded-full hover:bg-red-50 transition-colors"
                   onClick={() => removePollOption(i)}
                   disabled={newPoll.options.length <= 1}
                 >
-                  ✕
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
                 </button>
               </div>
             ))}
           </div>
           
-          <button
-            className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded mr-2"
-            onClick={addPollOption}
-          >
-            + Add Option
-          </button>
-          
-          <button
-            className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-            onClick={handlePollAdd}
-            disabled={!newPoll.question || newPoll.options.some(opt => !opt.label)}
-          >
-            Save Poll
-          </button>
+          <div className="flex gap-4">
+            <button
+              className="bg-gray-200 hover:bg-gray-300 px-5 py-2.5 rounded-lg transition-colors font-medium"
+              onClick={addPollOption}
+            >
+              + Add Option
+            </button>
+            
+            <button
+              className="bg-black hover:bg-gray-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+              onClick={handlePollAdd}
+              disabled={!newPoll.question || newPoll.options.some(opt => !opt.label)}
+            >
+              Create Poll
+            </button>
+          </div>
         </div>
 
         {/* Active Poll Display */}
         {activePoll && (
-          <div className="border p-4 rounded bg-yellow-50">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-bold">Active Poll</h3>
+          <div className="border border-yellow-200 bg-yellow-50 p-6 rounded-xl mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-800">Active Poll</h3>
               <button
                 onClick={endActivePoll}
-                className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
-                Archive Poll
+                End Poll
               </button>
             </div>
             
-            <p className="font-semibold mb-2">{activePoll.question}</p>
+            <p className="text-lg font-medium text-gray-800 mb-4">{activePoll.question}</p>
             
-            <ul className="space-y-2">
+            <ul className="space-y-3 mb-4">
               {activePoll.options.map((opt, i) => (
-                <li key={i} className="flex justify-between items-center">
-                  <span>
-                    <span className="font-bold">{opt.key}:</span> {opt.label} 
-                    <span className="text-gray-600 ml-2">({opt.votes} votes)</span>
+                <li key={i} className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-200">
+                  <span className="flex items-center gap-2">
+                    <span className="font-bold">{opt.key}:</span> 
+                    <span>{opt.label}</span>
+                    <span className="text-gray-500 text-sm">({opt.votes} votes)</span>
                   </span>
                   {!hasVoted && (
                     <button
                       onClick={() => vote(opt.key)}
-                      className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
                     >
                       Vote
                     </button>
@@ -1132,45 +1110,59 @@ const toggleLike = async (post) => {
             </ul>
             
             {hasVoted && (
-              <p className="mt-2 text-green-600">✓ You have already voted in this poll</p>
+              <p className="text-green-600 font-medium mb-2">✓ You have already voted in this poll</p>
             )}
             
-            <div className="mt-2 text-sm text-gray-600">
-              Total votes: {activePoll.options.reduce((sum, opt) => sum + opt.votes, 0)}
+            <div className="text-gray-600">
+              Total votes: <span className="font-medium">{activePoll.options.reduce((sum, opt) => sum + opt.votes, 0)}</span>
             </div>
           </div>
         )}
 
         {/* Archived Polls */}
         {polls.length > 0 && (
-          <div className="border p-4 rounded mt-4">
-            <h3 className="font-bold mb-2">Archived Polls</h3>
-            <div className="space-y-2">
+          <div className="border border-gray-200 p-6 rounded-xl">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Poll History</h3>
+            <div className="space-y-4">
               {polls.map((poll, index) => (
-                <details key={index} className="border rounded p-2">
-                  <summary className="font-semibold cursor-pointer">
-                    {poll.question} ({new Date(poll.createdAt?.seconds * 1000).toLocaleDateString()})
+                <details key={index} className="border border-gray-200 rounded-lg overflow-hidden">
+                  <summary className="bg-gray-50 p-4 cursor-pointer list-none">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-800">
+                        {poll.question} ({new Date(poll.createdAt?.seconds * 1000).toLocaleDateString()})
+                      </span>
+                      <svg className="w-5 h-5 text-gray-500 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
                   </summary>
-                  <ul className="mt-2 pl-4 space-y-1">
-                    {poll.options?.map((opt, i) => (
-                      <li key={i}>
-                        {opt.key}: {opt.label} ({opt.votes} votes)
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Total votes: {poll.options?.reduce((sum, opt) => sum + opt.votes, 0)}
+                  <div className="p-4 bg-white">
+                    <ul className="space-y-2">
+                      {poll.options?.map((opt, i) => (
+                        <li key={i} className="flex justify-between">
+                          <span>
+                            <span className="font-medium">{opt.key}:</span> {opt.label}
+                          </span>
+                          <span className="text-gray-600">{opt.votes} votes</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-3 text-sm text-gray-600">
+                      Total votes: {poll.options?.reduce((sum, opt) => sum + opt.votes, 0)}
+                    </div>
                   </div>
                 </details>
               ))}
             </div>
           </div>
         )}
-        {/* Posts Section */}
-<div className="bg-white p-4 rounded shadow space-y-4">
-  <h2 className="text-xl font-semibold">Social Posts</h2>
-  
-  {/* Create New Post */}
+      </section>
+
+      {/* Posts Section */}
+      <div className="bg-white p-4 rounded shadow space-y-4">
+        <h2 className="text-xl font-semibold">Social Posts</h2>
+
+        {/* Create New Post */}
   <div className="border p-4 rounded-lg bg-gray-50">
     <h3 className="font-bold mb-2">Create New Post</h3>
     
@@ -1340,8 +1332,5 @@ const toggleLike = async (post) => {
   </div>
 </div>
       </div>
-    </div>
-
-    
-  );
-}
+    );
+  }

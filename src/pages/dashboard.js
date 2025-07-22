@@ -10,6 +10,7 @@ import {
   FiStar,
   FiUser,
   FiLogOut,
+  FiAlertTriangle
 } from "react-icons/fi";
 import { getAuth, signOut } from "firebase/auth";
 
@@ -97,6 +98,19 @@ const Dashboard = () => {
               >
                 <FiUser className="mr-3" />
                 <span>Profile</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/errors"
+                className={`flex items-center p-3 rounded-lg transition ${
+                  location.pathname === "/dashboard/errors"
+                    ? "bg-red-600 text-white"
+                    : "text-gray-300 hover:bg-gray-800"
+                }`}
+              >
+                <FiAlertTriangle className="mr-3" />
+                <span>Log errors</span>
               </Link>
             </li>
             <li>
