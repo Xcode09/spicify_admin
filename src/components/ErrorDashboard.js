@@ -33,7 +33,7 @@ export default function ErrorDashboard() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center mb-6">
         <ExclamationTriangleIcon className="h-8 w-8 text-red-500 mr-3" />
-        <h1 className="text-2xl font-bold text-gray-800">Application Errors</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Error Logs</h1>
         <div className="ml-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
           {errors.length} total
         </div>

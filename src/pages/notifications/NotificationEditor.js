@@ -8,7 +8,7 @@ export default function NotificationEditor() {
     title: "",
     message: "",
     status: "draft",
-    scheduledAt: "",
+  scheduledAt: "",
     deepLink: "",
     richFormat: {
       bold: false,

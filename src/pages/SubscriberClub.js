@@ -9,6 +9,7 @@ import {
   setDoc,
   deleteDoc,
   addDoc,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
@@ -19,29 +20,43 @@ import { toast } from "react-toastify";
 export default function SubscriberClubManager() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    welcomeMessage: '',
-    quoteOfWeek: '',
-    isHolidaySpecial: false,
-    holidaySpecial: { title: '', imageUrl: '', audioUrl: '' },
-    sneakPeek: { imageUrl: '', audioUrl: '' },
-  });
-  const [bonusScenes, setBonusScenes] = useState([]);
-  const [polls, setPolls] = useState([]);
-  const [posts, setPosts] = useState([]);
-  const [newPoll, setNewPoll] = useState({
-    question: '',
-    multiChoice: false,
-    options: [{ key: 'A', label: '', votes: 0 }],
-  });
-  const [activePoll, setActivePoll] = useState(null);
-  const [hasVoted, setHasVoted] = useState(false);
-  // Add these to your existing state declarations
+  welcomeMessage: '',
+  quoteOfWeek: '',
+  isHolidaySpecial: false,
+  holidaySpecial: { 
+    title: '', 
+    imageUrl: '', 
+    audioUrl: '',
+    scheduledAt: '' 
+  },
+  sneakPeek: { 
+    imageUrl: '', 
+    audioUrl: '',
+    scheduledAt: '' 
+  },
+});
+
+const [bonusScenes, setBonusScenes] = useState([]);
+const [polls, setPolls] = useState([]);
+const [posts, setPosts] = useState([]);
 const [newPost, setNewPost] = useState({
   description: '',
   imageUrl: '',
   imageFile: null,
+  scheduledAt: ''
 });
+const [newPoll, setNewPoll] = useState({
+  question: '',
+  multiChoice: false,
+  options: [{ key: 'A', label: '', votes: 0 }],
+  scheduledAt: ''
+});
+  const [activePoll, setActivePoll] = useState(null);
+  const [hasVoted, setHasVoted] = useState(false);
+
 const [editingPost, setEditingPost] = useState(null);
+const [books, setBooks] = useState([]);
+const [selectedBookId, setSelectedBookId] = useState("");
 
   // Firestore references
   const clubDocRef = doc(db, 'subscriber_club', 'clubData');
@@ -54,6 +69,11 @@ const [editingPost, setEditingPost] = useState(null);
 
   // Load all data on component mount
   useEffect(() => {
+
+    const unsub = onSnapshot(collection(db, "audiobooks"), (snapshot) => {
+          const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          setBooks(list);
+        });
     loadData();
   }, []);
 
@@ -236,9 +256,17 @@ const [editingPost, setEditingPost] = useState(null);
 
     // Regular field updates (non-file fields)
     await updateDoc(doc(scenesColRef, id), { [field]: value });
+
+    // Convert scheduledAt to Date object if needed
+    const firestoreValue = field === 'scheduledAt' 
+      ? value instanceof Date ? value : new Date(value)
+      : value;
+
+    // Regular field updates (non-file fields)
+    await updateDoc(doc(scenesColRef, id), { [field]: firestoreValue });
     
-    // Only update local state if needed (optimization)
-    if (['title', 'author'].includes(field)) {
+    // Update local state for fields that need immediate UI updates
+    if (['title', 'author', 'selectedBookId', 'scheduledAt'].includes(field)) {
       setBonusScenes(prevScenes => 
         prevScenes.map(scene => 
           scene.id === id ? { ...scene, [field]: value } : scene
@@ -324,6 +352,7 @@ const handlePostAdd = async () => {
       authorName: user.displayName || 'Admin',
       authorAvatarUrl: user.photoURL || 'https://i.ibb.co/QDgYxYm/user.jpg',
       createdAt: new Date(),
+      scheduledAt: newPost.scheduledAt ? new Date(newPost.scheduledAt) : null,
       likes: 0,
       likedBy: [],
       comments: 0,
@@ -645,6 +674,27 @@ const toggleLike = async (post) => {
                 Audio selected (will be uploaded when you save)
               </p>
             )}
+
+
+  {/* Add this date picker at the end of the sneak peek section */}
+  <div className="mt-4">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Scheduled Date & Time (optional)
+    </label>
+    <input
+      type="datetime-local"
+      className="w-full border p-2 rounded"
+      value={form.sneakPeek.scheduledAt}
+      onChange={(e) => setForm({
+        ...form,
+        sneakPeek: {
+          ...form.sneakPeek,
+          scheduledAt: e.target.value
+        }
+      })}
+      min={new Date().toISOString().slice(0, 16)}
+    />
+  </div>
           </div>
         </div>
 
@@ -815,6 +865,25 @@ const toggleLike = async (post) => {
               </div>
             </div>
           )}
+          {/* Add this date picker at the end */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Scheduled Date & Time (optional)
+      </label>
+      <input
+        type="datetime-local"
+        className="w-full border p-2 rounded"
+        value={form.holidaySpecial.scheduledAt}
+        onChange={(e) => setForm({
+          ...form,
+          holidaySpecial: {
+            ...form.holidaySpecial,
+            scheduledAt: e.target.value
+          }
+        })}
+        min={new Date().toISOString().slice(0, 16)}
+      />
+    </div>
         </div>
       </section>
 
@@ -839,6 +908,25 @@ const toggleLike = async (post) => {
           <div className="space-y-6">
             {bonusScenes.map((scene) => (
               <div key={scene.id} className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+
+              <div className="mb-4">
+        <label>Select Audiobook:</label>
+        <select
+          className="w-full p-2 rounded border"
+          value={selectedBookId}
+          onChange={(e) => {
+            setSelectedBookId(e.target.value);
+            handleSceneUpdate(scene.id, 'selectedBookId', e.target.value);
+          }}
+        >
+          <option value="">-- Choose --</option>
+          {books.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.title}
+            </option>
+          ))}
+        </select>
+      </div>
                 <input
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-medium"
                   placeholder="Scene Title"
@@ -996,6 +1084,20 @@ const toggleLike = async (post) => {
                   )}
                 </div>
 
+            {/* Add this date picker before the delete button */}
+    <div className="mt-4 mb-4">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Scheduled Date & Time (optional)
+      </label>
+      <input
+        type="datetime-local"
+        className="w-full border p-2 rounded"
+        value={scene.scheduledAt || ''}
+        onChange={(e) => handleSceneUpdate(scene.id, 'scheduledAt', e.target.value)}
+        min={new Date().toISOString().slice(0, 16)}
+      />
+    </div>
+
                 <button
                   onClick={() => handleSceneDelete(scene.id)}
                   className="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-medium transition-colors"
@@ -1033,6 +1135,7 @@ const toggleLike = async (post) => {
             <label className="text-lg font-medium text-gray-700">Allow multiple choice</label>
           </div>
           
+          
           <div className="space-y-3 mb-6">
             {newPoll.options.map((opt, i) => (
               <div key={i} className="flex gap-3 items-center">
@@ -1055,6 +1158,21 @@ const toggleLike = async (post) => {
               </div>
             ))}
           </div>
+                <div className="mt-4 mb-6">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Scheduled Date & Time (optional)
+    </label>
+    <input
+      type="datetime-local"
+      className="w-full border p-2 rounded"
+      value={newPoll.scheduledAt}
+      onChange={(e) => setNewPoll({
+        ...newPoll,
+        scheduledAt: e.target.value
+      })}
+      min={new Date().toISOString().slice(0, 16)}
+    />
+  </div>
           
           <div className="flex gap-4">
             <button
@@ -1064,6 +1182,9 @@ const toggleLike = async (post) => {
               + Add Option
             </button>
             
+            {/* Add this date picker before the create button */}
+  
+
             <button
               className="bg-black hover:bg-gray-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
               onClick={handlePollAdd}
@@ -1072,7 +1193,9 @@ const toggleLike = async (post) => {
               Create Poll
             </button>
           </div>
+    
         </div>
+        
 
         {/* Active Poll Display */}
         {activePoll && (
@@ -1219,7 +1342,23 @@ const toggleLike = async (post) => {
         />
       </div>
     )}
-    
+    {/* Add this date picker before the post button */}
+  <div className="mt-4 mb-4">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Scheduled Date & Time (optional)
+    </label>
+    <input
+      type="datetime-local"
+      className="w-full border p-2 rounded"
+      value={newPost.scheduledAt}
+      onChange={(e) => setNewPost({
+        ...newPost,
+        scheduledAt: e.target.value
+      })}
+      min={new Date().toISOString().slice(0, 16)}
+    />
+  </div>
+
     <button
       onClick={handlePostAdd}
       className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"

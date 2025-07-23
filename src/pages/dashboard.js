@@ -110,7 +110,7 @@ const Dashboard = () => {
                 }`}
               >
                 <FiAlertTriangle className="mr-3" />
-                <span>Log errors</span>
+                <span>Error Logs</span>
               </Link>
             </li>
             <li>
