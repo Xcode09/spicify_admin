@@ -37,7 +37,7 @@ const DashboardHome = () => {
   const cardRoutes = {
     audiobooks: './audiobooks',
     users: './users',
-    subscribers: './users',
+    subscribers: './subscriber-club',
     notifications: './notifications',
     categories: './categories'
   };

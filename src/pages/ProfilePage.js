@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { getAuth, updateProfile, updateEmail, sendPasswordResetEmail } from "firebase/auth";
+import { getAuth, updateProfile, sendPasswordResetEmail } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase"; // Make sure to import your Firestore db instance
 import BunnyUploader from "../services/BunnyUploader";
 
 export default function ProfilePage() {
   const auth = getAuth();
   const [user, setUser] = useState(null);
   const [displayName, setDisplayName] = useState("");
+  const [name, setName] = useState(""); // For Firestore 'name' field
+  const [username, setUsername] = useState(""); // For Firestore 'username' field
   const [profileImage, setProfileImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-  const [email, setEmail] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -18,6 +21,10 @@ export default function ProfilePage() {
       setUser(currentUser);
       setDisplayName(currentUser.displayName || "");
       setPreviewImage(currentUser.photoURL || null);
+      
+      // Load additional user data from Firestore if needed
+      // You might want to add this if you want to display/edit other fields
+      // loadUserData(currentUser.uid);
     }
   }, [auth]);
 
@@ -29,15 +36,30 @@ export default function ProfilePage() {
     try {
       let photoURL = user.photoURL;
 
+      // Upload new profile image if selected
       if (profileImage) {
         photoURL = await BunnyUploader.upload(profileImage);
       }
 
+      // Update Firebase Authentication profile
       await updateProfile(user, {
         displayName,
         photoURL,
       });
 
+      // Update Firestore user document
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, {
+        displayName,
+        name: name || displayName, // Fallback to displayName if name not set
+        username,
+        profileImage: photoURL,
+        email: user.email,
+        uid: user.uid,
+        // Preserve existing fields that we're not updating
+      }, { merge: true }); // merge: true preserves existing fields not being updated
+
+      // Update local state
       setUser({ ...auth.currentUser });
       setMessage("Profile updated successfully!");
     } catch (error) {
@@ -66,6 +88,20 @@ export default function ProfilePage() {
       setMessage(`Error: ${error.message}`);
     }
   };
+
+  // Optional: Load additional user data from Firestore
+  // const loadUserData = async (userId) => {
+  //   try {
+  //     const userDoc = await getDoc(doc(db, "users", userId));
+  //     if (userDoc.exists()) {
+  //       const userData = userDoc.data();
+  //       setName(userData.name || "");
+  //       setUsername(userData.username || "");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading user data:", error);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -132,6 +168,29 @@ export default function ProfilePage() {
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Add additional fields from Firestore */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-transparent"
+                      placeholder="Your full name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-transparent"
+                      placeholder="Your username"
                     />
                   </div>
 

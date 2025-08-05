@@ -18,6 +18,9 @@ import NotificationEditor from "./pages/notifications/NotificationEditor";
 import ProfilePage from "./pages/ProfilePage"; // Updated import
 import EditBook from "./pages/editbook"; // ✅ NEW IMPORT
 import ErrorDashboard from './components/ErrorDashboard';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsPage from './pages/TermsPage';
+import AboutPage from './pages/AboutPage';
 
 export default function App() {
   return (
@@ -40,6 +43,9 @@ export default function App() {
             </Route>
             <Route path="/dashboard/profile" element={<ProfilePage />} />
             <Route path="/dashboard/errors" element={<ErrorDashboard />} />
+            <Route path="/dashboard/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/dashboard/terms" element={<TermsPage />} />
+            <Route path="/dashboard/about" element={<AboutPage />} />
           </Route>
         </Routes>
         <ToastContainer position="bottom-center" theme="dark" />

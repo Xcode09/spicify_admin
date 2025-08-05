@@ -10,7 +10,10 @@ import {
   FiStar,
   FiUser,
   FiLogOut,
-  FiAlertTriangle
+  FiAlertTriangle,
+  FiCommand,
+  FiAward,
+  FiInfo
 } from "react-icons/fi";
 import { getAuth, signOut } from "firebase/auth";
 
@@ -98,6 +101,45 @@ const Dashboard = () => {
               >
                 <FiUser className="mr-3" />
                 <span>Profile</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/privacy"
+                className={`flex items-center p-3 rounded-lg transition ${
+                  location.pathname === "/dashboard/privacy"
+                    ? "bg-red-600 text-white"
+                    : "text-gray-300 hover:bg-gray-800"
+                }`}
+              >
+                <FiCommand className="mr-3" />
+                <span>Privacy Policy</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/terms"
+                className={`flex items-center p-3 rounded-lg transition ${
+                  location.pathname === "/dashboard/terms"
+                    ? "bg-red-600 text-white"
+                    : "text-gray-300 hover:bg-gray-800"
+                }`}
+              >
+                <FiAward className="mr-3" />
+                <span>Terms of Service</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/about"
+                className={`flex items-center p-3 rounded-lg transition ${
+                  location.pathname === "/dashboard/about"
+                    ? "bg-red-600 text-white"
+                    : "text-gray-300 hover:bg-gray-800"
+                }`}
+              >
+                <FiInfo className="mr-3" />
+                <span>About Us</span>
               </Link>
             </li>
             <li>

@@ -9,7 +9,8 @@ import {
   setDoc,
   deleteDoc,
   addDoc,
-  onSnapshot
+  onSnapshot,
+  Timestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
@@ -78,44 +79,103 @@ const [selectedBookId, setSelectedBookId] = useState("");
   }, []);
 
   const loadData = async () => {
-    setLoading(true);
-    try {
-      const [docSnap, scenesSnap, pollsSnap, postsSnap, activePollSnap] = await Promise.all([
-        getDoc(clubDocRef),
-        getDocs(scenesColRef),
-        getDocs(pollsColRef),
-        getDocs(postsColRef),
-        getDoc(activePollDocRef).catch(() => null), // Handle case where active poll doesn't exist
-      ]);
+  setLoading(true);
+  try {
+    const [docSnap, scenesSnap, pollsSnap, postsSnap, activePollSnap] = await Promise.all([
+      getDoc(clubDocRef),
+      getDocs(scenesColRef),
+      getDocs(pollsColRef),
+      getDocs(postsColRef),
+      getDoc(activePollDocRef).catch(() => null),
+    ]);
 
-      if (docSnap.exists()) {
-        setForm(docSnap.data());
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      
+      // Convert Timestamps to datetime-local string format
+      if (data.sneakPeek?.scheduledAt) {
+        data.sneakPeek.scheduledAt = convertTimestampToInputFormat(data.sneakPeek.scheduledAt);
       }
-
-      setBonusScenes(scenesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-      setPolls(pollsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-      setPosts(postsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-
-      // Handle active poll
-      if (activePollSnap?.exists()) {
-        setActivePoll(activePollSnap.data());
-        
-        // Check if current user has voted
-        const user = auth.currentUser;
-        if (user) {
-          const voteDoc = await getDoc(doc(db, 'subscriber_club', 'clubData', 'pollVotes', user.uid));
-          setHasVoted(voteDoc.exists());
-        }
-      } else {
-        setActivePoll(null);
-        setHasVoted(false);
+      if (data.holidaySpecial?.scheduledAt) {
+        data.holidaySpecial.scheduledAt = convertTimestampToInputFormat(data.holidaySpecial.scheduledAt);
       }
-    } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
+      
+      setForm(data);
     }
-  };
+
+    // Convert timestamps for bonus scenes
+    const scenesData = scenesSnap.docs.map((doc) => {
+      const sceneData = doc.data();
+      if (sceneData.scheduledAt) {
+        sceneData.scheduledAt = convertTimestampToInputFormat(sceneData.scheduledAt);
+      }
+      return { id: doc.id, ...sceneData };
+    });
+    setBonusScenes(scenesData);
+
+    // Convert timestamps for polls
+    const pollsData = pollsSnap.docs.map((doc) => {
+      const pollData = doc.data();
+      if (pollData.scheduledAt) {
+        pollData.scheduledAt = convertTimestampToInputFormat(pollData.scheduledAt);
+      }
+      return { id: doc.id, ...pollData };
+    });
+    setPolls(pollsData);
+
+    // Convert timestamps for posts
+    const postsData = postsSnap.docs.map((doc) => {
+      const postData = doc.data();
+      if (postData.scheduledAt) {
+        postData.scheduledAt = convertTimestampToInputFormat(postData.scheduledAt);
+      }
+      return { id: doc.id, ...postData };
+    });
+    setPosts(postsData);
+
+    // Handle active poll
+    if (activePollSnap?.exists()) {
+      const activePollData = activePollSnap.data();
+      if (activePollData.scheduledAt) {
+        activePollData.scheduledAt = convertTimestampToInputFormat(activePollData.scheduledAt);
+      }
+      setActivePoll(activePollData);
+      
+      // Check if current user has voted
+      const user = auth.currentUser;
+      if (user) {
+        const voteDoc = await getDoc(doc(db, 'subscriber_club', 'clubData', 'pollVotes', user.uid));
+        setHasVoted(voteDoc.exists());
+      }
+    } else {
+      setActivePoll(null);
+      setHasVoted(false);
+    }
+  } catch (error) {
+    console.error("Error loading data:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Helper function to convert Firestore Timestamp to datetime-local input format
+function convertTimestampToInputFormat(timestamp) {
+  // If it's already a string (from editing), return it
+  if (typeof timestamp === 'string') return timestamp;
+  
+  // If it's a Firestore Timestamp
+  if (timestamp.toDate) {
+    const date = timestamp.toDate();
+    return date.toISOString().slice(0, 16);
+  }
+  
+  // If it's a Date object
+  if (timestamp instanceof Date) {
+    return timestamp.toISOString().slice(0, 16);
+  }
+  
+  return '';
+}
 
   // Club data management
   const updateClubDoc = async () => {
@@ -157,33 +217,65 @@ const [selectedBookId, setSelectedBookId] = useState("");
     const firestoreData = {
       ...formData,
       sneakPeek: {
-        imageUrl: formData.sneakPeek.imageUrl,
-        audioUrl: formData.sneakPeek.audioUrl
+        imageUrl: formData.sneakPeek.imageUrl || null,
+        audioUrl: formData.sneakPeek.audioUrl || null,
+       scheduledAt: formData.sneakPeek.scheduledAt || '',
       }
+
     };
 
-    
     if (formData.isHolidaySpecial) {
       firestoreData.holidaySpecial = {
-        title: formData.holidaySpecial.title,
-        imageUrl: formData.holidaySpecial.imageUrl,
-        audioUrl: formData.holidaySpecial.audioUrl
+        title: formData.holidaySpecial.title || null,
+        imageUrl: formData.holidaySpecial.imageUrl || null,
+        audioUrl: formData.holidaySpecial.audioUrl || null,
+        scheduledAt: formData.holidaySpecial.scheduledAt || ''
+
       };
+      
+
+    } else {
+      // Remove holiday special data if not enabled
+      delete firestoreData.holidaySpecial;
     }
 
+    // Clean up undefined/null values
+    const cleanData = cleanObject(firestoreData);
+
     // Save to Firestore
-    await setDoc(clubDocRef, firestoreData);
+    await setDoc(clubDocRef, cleanData);
     toast.success('Club configuration updated successfully!');
     toast.dismiss();
-    setLoading(false);
   } catch (error) {
     console.error("Error updating club data:", error);
     toast.error(`Error: ${error.message}`);
-    setLoading(false);
+    toast.dismiss();
   } finally {
     setLoading(false);
+    toast.dismiss();
   }
 };
+
+// Helper function to validate dates
+function isValidDate(dateString) {
+  if (!dateString) return false;
+  const date = new Date(dateString);
+  return !isNaN(date.getTime());
+}
+
+// Helper function to clean object
+function cleanObject(obj) {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (typeof value === 'object' && !Array.isArray(value)) {
+        acc[key] = cleanObject(value);
+      } else {
+        acc[key] = value;
+      }
+    }
+    return acc;
+  }, {});
+}
 
   // Bonus scenes management
   const handleSceneAdd = async () => {
@@ -281,6 +373,7 @@ const [selectedBookId, setSelectedBookId] = useState("");
   }
 };
 
+
   const handleSceneDelete = async (id) => {
     try {
       await deleteDoc(doc(scenesColRef, id));
@@ -351,7 +444,9 @@ const handlePostAdd = async () => {
       imageUrl: imageUrl,
       authorName: user.displayName || 'Admin',
       authorAvatarUrl: user.photoURL || 'https://i.ibb.co/QDgYxYm/user.jpg',
+      authorId: user.uid,
       createdAt: new Date(),
+
       scheduledAt: newPost.scheduledAt ? new Date(newPost.scheduledAt) : null,
       likes: 0,
       likedBy: [],
