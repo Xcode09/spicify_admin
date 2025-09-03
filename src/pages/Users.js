@@ -98,6 +98,9 @@ export default function Users() {
   const deleteUser = async (id) => {
     try {
       await deleteDoc(doc(db, "users", id));
+      // Call backend API to delete user from Firebase Auth
+      await fetch(`https://www.spicifyapp.com/auth/deleteUser/${id}`, { method: "DELETE" });
+
       toast.success("User deleted");
       fetchUsers();
     } catch (err) {
@@ -207,7 +210,7 @@ export default function Users() {
               <th className="p-2 border-b">Name</th>
               <th className="p-2 border-b">Email</th>
               <th className="p-2 border-b">UID</th>
-              <th className="p-2 border-b">Verified</th>
+              <th className="p-2 border-b">Email Verified</th>
               <th className="p-2 border-b">Subscriber</th>
               {isAdmin && <th className="p-2 border-b">Actions</th>}
             </tr>
@@ -223,7 +226,7 @@ export default function Users() {
                   {user.isVerified ? "✅" : "❌"}
                 </td>
                 <td className="p-2 border-b text-gray-800">
-                  {user.isSubscriber ? "👑" : "—"}
+                  {user.isSubscriber ? "Paid 👑" : "Free"}
                 </td>
                 {isAdmin && (
                   <td className="p-2 border-b space-x-2">
