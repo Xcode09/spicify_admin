@@ -432,6 +432,8 @@ const handlePostAdd = async () => {
     if (!user) throw new Error('User not authenticated');
 
     let imageUrl = newPost.imageUrl;
+
+    setLoading(true);   
     
     // If there's an image file, upload it first
     if (newPost.imageFile) {
@@ -461,9 +463,12 @@ const handlePostAdd = async () => {
       imageFile: null,
     });
     loadData();
+
+    setLoading(false);
   } catch (error) {
     console.error("Error adding post:", error);
     alert('Error adding post');
+    setLoading(false);
   }
 };
 
@@ -1454,13 +1459,45 @@ const toggleLike = async (post) => {
     />
   </div>
 
-    <button
-      onClick={handlePostAdd}
-      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      disabled={!newPost.description}
+    {loading ? (
+  <button
+    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center"
+    disabled
+  >
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
     >
-      Post
-    </button>
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  </button>
+) : (
+  <button
+    onClick={async () => {
+      setLoading(true);
+      await handlePostAdd();
+      setLoading(false);
+    }}
+    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    disabled={!newPost.description}
+  >
+    Post
+  </button>
+)}
   </div>
   
   {/* Posts List */}

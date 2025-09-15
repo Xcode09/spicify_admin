@@ -107,13 +107,25 @@ export default function ChapterManager() {
   }, []);
 
   useEffect(() => {
-    if (!selectedBookId) return;
-    const book = books.find((b) => b.id === selectedBookId);
-    if (book && book.chapters) {
-      const sorted = [...book.chapters].sort((a, b) => a.chapterId - b.chapterId);
-      setChapters(sorted);
+  if (!selectedBookId) {
+    setChapters([]);
+    return;
+  }
+  
+  const unsub = onSnapshot(doc(db, "audiobooks", selectedBookId), (doc) => {
+    if (doc.exists()) {
+      const book = doc.data();
+      if (book.chapters) {
+        const sorted = [...book.chapters].sort((a, b) => a.chapterId - b.chapterId);
+        setChapters(sorted);
+      } else {
+        setChapters([]);
+      }
     }
-  }, [selectedBookId, books]);
+  });
+  
+  return () => unsub();
+}, [selectedBookId]); // Only depend on selectedBookId
 
   const updateChaptersInFirestore = async (updatedChapters) => {
     const bookRef = doc(db, "audiobooks", selectedBookId);
