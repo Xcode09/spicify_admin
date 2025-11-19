@@ -22,6 +22,19 @@ export default function Addbooks() {
   const [availableGenres, setAvailableGenres] = useState([]);
   const [fallbackGenres, setFallbackGenres] = useState([]);
 
+
+  const [hubButtons, setHubButtons] = useState({
+  listen: true,
+  read: true,
+  watch: false,
+});
+
+const [readingModeEnabled, setReadingModeEnabled] = useState(true);
+const [watchModeEnabled, setWatchModeEnabled] = useState(false);
+
+const [isDownloadable, setIsDownloadable] = useState(false);
+
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,19 +92,26 @@ export default function Addbooks() {
       }
 
       const bookData = {
-        title,
-        author,
-        summary: description,
-        language,
-        tags,
-        spiceLevel,
-        bookCover: bookCoverUrl,
-        audioUrl,
-        isRecommended,
-        teaserQuote,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      };
+  title,
+  author,
+  summary: description,
+  language,
+  tags,
+  spiceLevel,
+  bookCover: bookCoverUrl,
+  audioUrl,
+  isRecommended,
+  teaserQuote,
+
+  // ⭐ NEWLY ADDED FIELDS ⭐
+  hubButtons,
+  readingModeEnabled,
+  watchModeEnabled,
+  isDownloadable,
+
+  createdAt: Timestamp.now(),
+  updatedAt: Timestamp.now()
+};
 
       await addDoc(collection(db, "audiobooks"), bookData);
       
@@ -272,6 +292,78 @@ export default function Addbooks() {
                 </div>
               </div>
             </div>
+
+            {/* Hub Buttons */}
+<div className="space-y-2 md:col-span-2">
+  <label className="block text-sm font-medium text-gray-700">
+    Hub Button Options
+  </label>
+
+  <div className="flex gap-6 bg-gray-50 p-4 rounded-md">
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={hubButtons.listen}
+        onChange={(e) =>
+          setHubButtons({ ...hubButtons, listen: e.target.checked })
+        }
+      />
+      Listen
+    </label>
+
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={hubButtons.read}
+        onChange={(e) =>
+          setHubButtons({ ...hubButtons, read: e.target.checked })
+        }
+      />
+      Read
+    </label>
+
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={hubButtons.watch}
+        onChange={(e) =>
+          setHubButtons({ ...hubButtons, watch: e.target.checked })
+        }
+      />
+      Watch
+    </label>
+  </div>
+</div>
+
+{/* Reading Mode */}
+<div className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={readingModeEnabled}
+    onChange={(e) => setReadingModeEnabled(e.target.checked)}
+  />
+  <label className="text-sm text-gray-700">Reading Mode Enabled</label>
+</div>
+
+{/* Watch Mode */}
+<div className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={watchModeEnabled}
+    onChange={(e) => setWatchModeEnabled(e.target.checked)}
+  />
+  <label className="text-sm text-gray-700">Watch Mode Enabled</label>
+</div>
+{/* Allow Download */}
+<div className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={isDownloadable}
+    onChange={(e) => setIsDownloadable(e.target.checked)}
+  />
+  <label className="text-sm text-gray-700">Allow Download</label>
+</div>
+
 
             {/* Submit Button */}
             <div className="pt-4">

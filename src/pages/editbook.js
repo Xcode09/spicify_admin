@@ -27,6 +27,17 @@ export default function EditBook() {
   const [existingCover, setExistingCover] = useState("");
   const [existingAudio, setExistingAudio] = useState("");
 
+  const [hubButtons, setHubButtons] = useState({
+  listen: true,
+  read: true,
+  watch: false,
+});
+
+const [readingModeEnabled, setReadingModeEnabled] = useState(true);
+const [watchModeEnabled, setWatchModeEnabled] = useState(false);
+
+const [isDownloadable, setIsDownloadable] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -50,6 +61,10 @@ export default function EditBook() {
           setTeaserQuote(book.teaserQuote || "");
           setExistingCover(book.bookCover || "");
           setExistingAudio(book.audioUrl || "");
+          setHubButtons(book.hubButtons || { listen: true, read: true, watch: false });
+setReadingModeEnabled(book.readingModeEnabled ?? true);
+setWatchModeEnabled(book.watchModeEnabled ?? false);
+setIsDownloadable(book.isDownloadable ?? false);
         } else {
           toast.error("Audiobook not found.");
           navigate("/dashboard/audiobooks");
@@ -91,18 +106,25 @@ export default function EditBook() {
       }
 
       const updatedData = {
-        title,
-        author,
-        summary: description,
-        language,
-        tags,
-        spiceLevel,
-        bookCover: bookCoverUrl,
-        audioUrl,
-        isRecommended,
-        teaserQuote,
-        updatedAt: Timestamp.now(),
-      };
+  title,
+  author,
+  summary: description,
+  language,
+  tags,
+  spiceLevel,
+  bookCover: bookCoverUrl,
+  audioUrl,
+  isRecommended,
+  teaserQuote,
+
+  // ⭐ NEW FIELDS ⭐
+  hubButtons,
+  readingModeEnabled,
+  watchModeEnabled,
+  isDownloadable,
+
+  updatedAt: Timestamp.now(),
+};
 
       await updateDoc(doc(db, "audiobooks", id), updatedData);
 
@@ -252,6 +274,81 @@ export default function EditBook() {
                   ))}
                 </div>
               </div>
+              {/* Hub Buttons */}
+<div className="mt-4">
+  <h3 className="text-sm font-semibold mb-2">Hub Buttons</h3>
+
+  <div className="flex flex-col gap-2">
+
+    {/* Listen Button */}
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={hubButtons.listen}
+        onChange={(e) =>
+          setHubButtons({ ...hubButtons, listen: e.target.checked })
+        }
+      />
+      <span className="text-sm text-gray-700">Listen</span>
+    </label>
+
+    {/* Read Button */}
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={hubButtons.read}
+        onChange={(e) =>
+          setHubButtons({ ...hubButtons, read: e.target.checked })
+        }
+      />
+      <span className="text-sm text-gray-700">Read</span>
+    </label>
+
+    {/* Watch Button */}
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={hubButtons.watch}
+        onChange={(e) =>
+          setHubButtons({ ...hubButtons, watch: e.target.checked })
+        }
+      />
+      <span className="text-sm text-gray-700">Watch</span>
+    </label>
+
+  </div>
+</div>
+
+
+  {/* Reading Mode */}
+<div className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={readingModeEnabled}
+    onChange={(e) => setReadingModeEnabled(e.target.checked)}
+  />
+  <label className="text-sm text-gray-700">Reading Mode Enabled</label>
+</div>
+
+{/* Watch Mode */}
+<div className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={watchModeEnabled}
+    onChange={(e) => setWatchModeEnabled(e.target.checked)}
+  />
+  <label className="text-sm text-gray-700">Watch Mode Enabled</label>
+</div>
+
+{/* Download Option */}
+<div className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={isDownloadable}
+    onChange={(e) => setIsDownloadable(e.target.checked)}
+  />
+  <label className="text-sm text-gray-700">Allow Download</label>
+</div>
 
               {/* Media Card */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 md:col-span-2">
